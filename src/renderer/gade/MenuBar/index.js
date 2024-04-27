@@ -1,11 +1,11 @@
-import {Container} from "./Container";
-import Menu from './Menu';
-import GADE from '../gade';
 import { useEffect, useState } from 'react';
+import { Container } from './Container';
+import Menu from './Menu';
+import GADE, { MenuPosition } from '../gade';
 
-let actions = {};
+const actions = {};
 
-GADE.receive("Menu.Action", (actionId) => {
+GADE.receive('Menu.Action', (actionId) => {
     const action = actions[actionId];
 
     if (action) {
@@ -15,7 +15,7 @@ GADE.receive("Menu.Action", (actionId) => {
 
 let closeCallback = () => {};
 
-GADE.receive("Menu.Blur", () => closeCallback());
+GADE.receive('Menu.Blur', () => closeCallback());
 
 export default function MenuBar(props) {
     const [open, setOpen] = useState(false);
@@ -28,13 +28,11 @@ export default function MenuBar(props) {
             setOpen(true);
         }
 
-        const [x, y] = [
-            event.screenX - event.clientX + event.currentTarget.offsetLeft,
-            event.screenY - event.clientY + event.currentTarget.offsetTop + event.currentTarget.offsetHeight,
-        ];
+        const [x, y] = GADE.getElementMenuPosition(event, MenuPosition.Bottom);
 
-        GADE.call("Menu.Test", {
-            x, y,
+        GADE.openMenu({
+            x,
+            y,
             items,
             level: 0,
         });
@@ -49,7 +47,7 @@ export default function MenuBar(props) {
         if (open) {
             setOpen(false);
         }
-    }
+    };
 
     useEffect(() => {
         window.addEventListener('click', onClick);
@@ -69,7 +67,7 @@ export default function MenuBar(props) {
                 shortcut: child.props.shortcut,
                 icon: child.props.icon,
                 divider: false,
-                dropdown: []
+                dropdown: [],
             };
 
             if (child.props.action) {
@@ -78,28 +76,32 @@ export default function MenuBar(props) {
             }
 
             switch (child.type.name) {
-            case "MenuItem":
-                break;
-            case "Menu":
-                value.dropdown = findItems(actionId, child.props.children);
-                break;
-            case "Divider":
-                value.divider = true;
-                break;
-            default:
-                break;
+                case 'MenuItem':
+                    break;
+                case 'Menu':
+                    value.dropdown = findItems(actionId, child.props.children);
+                    break;
+                case 'Divider':
+                    value.divider = true;
+                    break;
+                default:
+                    break;
             }
 
             return value;
         });
     };
 
+    const children = Array.isArray(props.children)
+        ? props.children
+        : [props.children];
+
     return (
         <Container onClickCapture={onClick}>
-            {props.children.map((menu) => {
+            {children.map((menu) => {
                 const items = findItems(menu.props.title, menu.props.children);
 
-                if (menu.type.name === "Menu") {
+                if (menu.type.name === 'Menu') {
                     return (
                         <Menu
                             title={menu.props.title}

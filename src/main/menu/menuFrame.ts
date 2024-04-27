@@ -1,8 +1,8 @@
 import { app, BrowserWindow } from 'electron';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import GADE from '../gade';
 import { createMenuWindow } from './createMenuWindow';
 import { mainWindow } from '../main';
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 type MenuItem = {
     label: string | undefined;
@@ -21,23 +21,59 @@ type MenuData = {
 };
 
 let mainMenuWindow: BrowserWindow;
-let menuWindows: BrowserWindow[] = [];
+const menuWindows: BrowserWindow[] = [];
+let currentLevel = 0;
 
-let block = false;
+const closeMenu = (level: number) => {
+    if (level === 0) {
+        mainMenuWindow.setOpacity(0);
+        mainMenuWindow.hide();
+    }
+
+    currentLevel = level - 1;
+
+    --level;
+
+    for (let i = level; i < menuWindows.length; ++i) {
+        const window = menuWindows[i];
+
+        if (window) {
+            window.setOpacity(0);
+            window.hide();
+        }
+    }
+
+    const newCurrentWindow = level < 1 ? mainMenuWindow : menuWindows[level];
+
+    if (newCurrentWindow) {
+        newCurrentWindow.focus();
+    }
+};
+
+const handleBlur = (level: number) => {
+    if (level === currentLevel) {
+        closeMenu(0);
+        GADE.broadcast('Menu.Blur');
+    }
+};
+
+const pushNewMenuWindow = () => {
+    const menu = createMenuWindow();
+
+    const thisLevel = menuWindows.length + 1;
+
+    menu.on('blur', () => handleBlur(thisLevel));
+
+    menuWindows.push(menu);
+};
 
 app.whenReady().then(() => {
     mainMenuWindow = createMenuWindow();
 
-    mainMenuWindow.on('blur', () => {
-        closeMenu(0);
+    mainMenuWindow.on('blur', () => handleBlur(0));
 
-        if (mainWindow) {
-            GADE.send("Menu.Blur", mainWindow);
-        }
-    });
-
-    menuWindows.push(createMenuWindow());
-    menuWindows.push(createMenuWindow());
+    pushNewMenuWindow();
+    pushNewMenuWindow();
 });
 
 const calculateHeight = (items: MenuItem[]) => {
@@ -47,7 +83,7 @@ const calculateHeight = (items: MenuItem[]) => {
         if (item.divider) {
             height += 5;
         } else {
-            height += 31;
+            height += 30;
         }
     });
 
@@ -55,9 +91,9 @@ const calculateHeight = (items: MenuItem[]) => {
 };
 
 const openMenu = (data: MenuData) => {
-    let selectedMenu : BrowserWindow | undefined;
+    let selectedMenu: BrowserWindow | undefined;
 
-    if (data.level == 0) {
+    if (data.level === 0) {
         selectedMenu = mainMenuWindow;
     } else {
         selectedMenu = menuWindows[data.level - 1];
@@ -65,7 +101,9 @@ const openMenu = (data: MenuData) => {
 
     closeMenu(data.level + 1);
 
-    GADE.call("Menu.DataTransmit", selectedMenu, data);
+    currentLevel = data.level;
+
+    GADE.call('Menu.DataTransmit', selectedMenu, data);
 
     if (!selectedMenu) {
         return;
@@ -74,40 +112,16 @@ const openMenu = (data: MenuData) => {
     selectedMenu.setPosition(data.x, data.y);
     selectedMenu.setResizable(true);
     selectedMenu.setSize(250, calculateHeight(data.items), false);
-    selectedMenu.setResizable(false);
     selectedMenu.showInactive();
-    selectedMenu.setAlwaysOnTop(true);
+    selectedMenu.show();
     selectedMenu.setOpacity(1);
-
-    if (data.level == 0) {
-        selectedMenu.focus();
-    }
 };
 
-const closeMenu = (level: number) => {
-    if (level === 0) {
-        mainMenuWindow.setOpacity(0);
-        mainMenuWindow.hide();
-    }
+GADE.register('Menu.Open', openMenu);
+GADE.register('Menu.Close', closeMenu);
 
-    --level;
-
-    for (let i = level; i < menuWindows.length; ++i) {
-        const window = menuWindows[i];
-
-        if (window) {
-            window.setAlwaysOnTop(false);
-            window.setOpacity(0);
-            window.hide();
-        }
-    }
-};
-
-GADE.register("Menu.Test", openMenu);
-GADE.register("Menu.Close", closeMenu);
-
-GADE.receive("Menu.Action", (event, id) => {
+GADE.receive('Menu.Action', (event, id) => {
     if (mainWindow) {
-        GADE.send("Menu.Action", mainWindow, id);
+        GADE.broadcast('Menu.Action', id);
     }
 });

@@ -80,7 +80,7 @@ const createWindow = async () => {
         titleBarOverlay: {
             color: '#1e2024',
             symbolColor: '#ffffffaa',
-            height: 40,
+            height: 39,
         },
     });
 
@@ -140,3 +140,4 @@ app.whenReady()
 
 require('./menu/menuFrame');
 require('./app');
+require('./window');

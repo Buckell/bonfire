@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     display: flex;
@@ -7,12 +7,14 @@ export const Container = styled.div`
     right: 0;
     left: 0;
     height: 40px;
-    
+
+    z-index: 10000;
+
     background-color: #1e2024;
 
     -webkit-user-select: none;
     -webkit-app-region: drag;
-    
+
     * {
         -webkit-app-region: no-drag;
     }

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     display: table;
@@ -11,8 +11,8 @@ export const Container = styled.div`
         display: table-cell;
         vertical-align: middle;
 
-        color: #DDDDDD;
-        font-family: "Segoe UI Light", "Roboto", sans-serif;
+        color: #dddddd;
+        font-family: 'Segoe UI Light', 'Roboto', sans-serif;
         font-weight: 300;
         font-size: 11pt;
     }

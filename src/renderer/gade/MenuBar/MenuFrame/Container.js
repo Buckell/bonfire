@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     position: fixed;
@@ -9,5 +9,5 @@ export const Container = styled.div`
 
     border: solid 1px #333;
 
-    background: #222222FF;
+    background: #222222ff;
 `;

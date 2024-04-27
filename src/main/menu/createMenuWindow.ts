@@ -18,7 +18,7 @@ export const createMenuWindow = () => {
         titleBarStyle: 'hidden',
         titleBarOverlay: false,
         skipTaskbar: true,
-        alwaysOnTop: true
+        alwaysOnTop: true,
     });
 
     menuWindow.loadURL(resolveHtmlPath(`index.html/menu_frame`)).then(() => {

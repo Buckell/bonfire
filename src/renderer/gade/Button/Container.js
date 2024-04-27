@@ -2,11 +2,15 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
     display: inline-block;
+    border-radius: 7px;
+
+    user-select: none;
 
     button {
         border: hidden;
+        border-radius: inherit;
+
         background: #151515;
-        border-radius: 7px;
         height: 30px;
         padding-left: 12px;
         padding-right: 12px;

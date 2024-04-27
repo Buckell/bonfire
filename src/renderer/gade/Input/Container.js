@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     input {
@@ -9,7 +9,7 @@ export const Container = styled.div`
         padding-left: 12px;
         padding-right: 12px;
 
-        font-family: "Roboto", sans-serif;
+        font-family: 'Roboto', sans-serif;
         font-size: 10pt;
         font-weight: 300;
         color: #dddddd;
@@ -18,7 +18,7 @@ export const Container = styled.div`
     }
 
     p {
-        font-family: "Inter", sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 8pt;
         color: #aaaaaa;
         margin-bottom: 4px;
