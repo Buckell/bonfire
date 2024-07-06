@@ -11,6 +11,7 @@ import Colors from './Tool/Colors';
 import SacnOutput from './Tool/SacnOutput';
 import DcsmOutput from './Tool/DcsmOutput';
 import Patches from './Tool/Patches';
+import Controls from './Tool/Controls';
 
 export const tools: any = {};
 
@@ -61,7 +62,7 @@ addTool('colors', {
 addTool('controls', {
     title: 'Controls',
     icon: faKeyboard,
-    window: null,
+    window: Controls,
 });
 
 addTool('sacn', {
