@@ -1,15 +1,17 @@
-import {Container} from "./Container";
-import {Body} from "./Body";
-import {useEffect, useRef, useState} from "react";
-import DropArrow from "./DropArrow";
-import {Selection} from "./Selection";
-import DropdownItem from "./DropdownItem";
+import { useEffect, useRef, useState } from 'react';
+import { Container } from './Container';
+import { Body } from './Body';
+import DropArrow from './DropArrow';
+import { Selection } from './Selection';
+import DropdownItem from './DropdownItem';
 
 export default function Dropdown(props) {
-    const [internalValue, setInternalValue] = useState(props.defaultValue || "");
+    const [internalValue, setInternalValue] = useState(
+        props.defaultValue || '',
+    );
     const [expanded, setExpanded] = useState(false);
 
-    const value = props.value || internalValue || "";
+    const value = props.value || internalValue || '';
     const valueLower = value.toLowerCase();
 
     const onChange = (e) => {
@@ -22,20 +24,26 @@ export default function Dropdown(props) {
 
     useEffect(() => setInternalValue(props.value), [props.value]);
 
-    const children = Array.isArray(props.children) ? props.children : [props.children];
+    const children = Array.isArray(props.children || 0)
+        ? props.children
+        : [props.children];
 
-    const labels = children.map((child) => child.props.label);
+    const labels = children.map((child) => child?.props?.label);
 
-    const searching = value !== "" && !labels.includes(value);
+    const searching = value !== '' && !labels.includes(value);
 
     const close = () => setTimeout(() => setExpanded(false), 200);
 
     return (
-        <Container style={props.style} className={props.disabled && "disabled"}>
+        <Container style={props.style} className={props.disabled && 'disabled'}>
             {props.label && <p>{props.label}</p>}
 
-
-            <div style={{ position: "relative" }}>
+            <div
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                }}
+            >
                 <Body
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
@@ -50,25 +58,27 @@ export default function Dropdown(props) {
 
             <Selection
                 style={{
-                    display: expanded ? "initial" : "none"
+                    display: expanded ? 'initial' : 'none',
                 }}
             >
-                {
-                    (searching ?
-                    children.filter((child) => child.props?.label?.toLowerCase().includes(valueLower)) :
-                    children)
-                    .map((item) => (
-                        <DropdownItem
-                            key={item.props.label}
-                            onClick={() => {
-                                setExpanded(false);
-                                onChange(item.props.label);
-                            }}
-                        >
-                            {item.props.label || item.children}
-                        </DropdownItem>
-                    ))
-                }
+                {(searching
+                    ? children.filter((child) =>
+                          child.props?.label
+                              ?.toLowerCase()
+                              .includes(valueLower),
+                      )
+                    : children
+                ).map((item) => (
+                    <DropdownItem
+                        key={item?.props?.label}
+                        onClick={() => {
+                            setExpanded(false);
+                            onChange(item.props.label);
+                        }}
+                    >
+                        {item?.props?.label || item?.children}
+                    </DropdownItem>
+                ))}
             </Selection>
         </Container>
     );

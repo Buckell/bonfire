@@ -141,3 +141,4 @@ app.whenReady()
 require('./menu/menuFrame');
 require('./app');
 require('./window');
+require('./dialog');

@@ -1,28 +1,15 @@
 import { app, BrowserWindow } from 'electron';
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import GADE from '../gade';
 import { createMenuWindow } from './createMenuWindow';
 import { mainWindow } from '../main';
-
-type MenuItem = {
-    label: string | undefined;
-    shortcut: string | undefined;
-    divider: boolean | undefined;
-    dropdown: MenuItem[] | undefined;
-    icon: IconDefinition | undefined;
-};
-
-type MenuData = {
-    x: number;
-    y: number;
-    level: number;
-
-    items: MenuItem[];
-};
+import { MenuData, MenuItem } from '../../gade_shared/menu';
 
 let mainMenuWindow: BrowserWindow;
 const menuWindows: BrowserWindow[] = [];
 let currentLevel = 0;
+
+GADE.hooks.bridge('Menu.Blur');
+GADE.hooks.bridge('Menu.Action');
 
 const closeMenu = (level: number) => {
     if (level === 0) {
@@ -58,9 +45,9 @@ const handleBlur = (level: number) => {
 };
 
 const pushNewMenuWindow = () => {
-    const menu = createMenuWindow();
-
     const thisLevel = menuWindows.length + 1;
+
+    const menu = createMenuWindow(thisLevel);
 
     menu.on('blur', () => handleBlur(thisLevel));
 
@@ -115,6 +102,7 @@ const openMenu = (data: MenuData) => {
     selectedMenu.showInactive();
     selectedMenu.show();
     selectedMenu.setOpacity(1);
+    selectedMenu.setResizable(false);
 };
 
 GADE.register('Menu.Open', openMenu);
@@ -122,6 +110,6 @@ GADE.register('Menu.Close', closeMenu);
 
 GADE.receive('Menu.Action', (event, id) => {
     if (mainWindow) {
-        GADE.broadcast('Menu.Action', id);
+        GADE.hooks.call('Menu.Action', id);
     }
 });

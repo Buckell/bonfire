@@ -6,6 +6,11 @@ import {
     faPlug
 } from '@fortawesome/free-solid-svg-icons';
 import CueList from './Tool/CueList';
+import Channels from './Tool/Channels';
+import Colors from './Tool/Colors';
+import SacnOutput from './Tool/SacnOutput';
+import DcsmOutput from './Tool/DcsmOutput';
+import Patches from './Tool/Patches';
 
 export const tools: any = {};
 
@@ -38,19 +43,19 @@ addTool('cues', {
 addTool('channels', {
     title: 'Channels',
     icon: faHashtag,
-    window: null,
+    window: Channels,
 });
 
 addTool('patches', {
     title: 'Patches',
     icon: faPlug,
-    window: null,
+    window: Patches,
 });
 
 addTool('colors', {
     title: 'Colors',
     icon: faDroplet,
-    window: null,
+    window: Colors,
 });
 
 addTool('controls', {
@@ -62,7 +67,7 @@ addTool('controls', {
 addTool('sacn', {
     title: 'sACN',
     icon: faGlobe,
-    window: null,
+    window: SacnOutput,
 });
 
 addTool('artnet', {
@@ -74,5 +79,5 @@ addTool('artnet', {
 addTool('dcsm', {
     title: 'DCSM Devices',
     icon: faHardDrive,
-    window: null,
+    window: DcsmOutput,
 });

@@ -6,9 +6,12 @@ import GADE from '../../../../gade/gade';
 import { tools } from '../../../tools';
 import Tab from './Tabs/Tab';
 import ContextMenu from '../../../../gade/ContextMenu';
+import { Bonfire } from '../../../bonfire';
 
 export default function ToolWindow(props) {
     const { style, id } = props;
+
+    const [tabPosition] = Bonfire.useUIConfigItem('toolWindowTabPosition');
 
     const [tabs, setTabs] = useState([]);
     const [currentTab, setCurrentTab] = useState(-1);
@@ -41,7 +44,7 @@ export default function ToolWindow(props) {
         );
     };
 
-    GADE.addHook('Menu.Action', `ToolWindow.${id}`, (action) => {
+    GADE.hooks.add('Menu.Action', `ToolWindow.${id}`, (action) => {
         const openStart = `ToolWindow.${id}.Open.`;
         const closeStart = `ToolWindow.${id}.Close.`;
 
@@ -62,6 +65,9 @@ export default function ToolWindow(props) {
 
     return (
         <Container style={style}>
+            {tabPosition === 'bottom' && (
+                <Frame>{tabs[currentTab]?.window}</Frame>
+            )}
             <Tabs id={id}>
                 {tabs.map((tab, index) => (
                     <ContextMenu
@@ -83,7 +89,7 @@ export default function ToolWindow(props) {
                     </ContextMenu>
                 ))}
             </Tabs>
-            <Frame>{tabs[currentTab]?.window}</Frame>
+            {tabPosition === 'top' && <Frame>{tabs[currentTab]?.window}</Frame>}
         </Container>
     );
 }

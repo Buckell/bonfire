@@ -1,0 +1,6 @@
+TODO:
+ - Fix issue on Colors page where color will default to black if first
+   selected channel is one without a color attribute.
+ - Fix tab management (of multiple tabs with the same type). Either with exclusion or tab IDs.
+ - Fix Menu.DataTransmit listener overflow. (Where in the hell are they coming from?)
+ - Change "New Patch" and other similar elements to modals/dialogs.

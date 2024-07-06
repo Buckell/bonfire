@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-    height: 30px;
+    height: 40px;
 
     user-select: none;
 
@@ -22,14 +22,15 @@ export const Container = styled.div`
 
     div {
         display: table;
-        height: 30px;
-        margin-right: 10px;
+        height: 40px;
+        margin-right: 12px;
 
         svg {
             display: table-cell;
-            margin: 7px 7px 7px 7px;
+            margin: 12px 10px 10px 10px;
             vertical-align: middle;
-            height: 16px;
+            height: 18px;
+            width: 18px;
             color: #bbbbbb;
         }
 

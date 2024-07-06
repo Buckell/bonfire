@@ -3,9 +3,16 @@ import path from 'path';
 import GADE from './gade';
 import { resolveHtmlPath } from './util';
 
-const windows: any = {};
+export const windows: { [id: string]: BrowserWindow } = {};
 
-const openWindow = (windowPath: string) => {
+export type WindowOptions = {
+    hideOverlay?: boolean;
+};
+
+export const openWindow = (
+    windowPath?: string,
+    options: WindowOptions = {},
+) => {
     const RESOURCES_PATH = app.isPackaged
         ? path.join(process.resourcesPath, 'assets')
         : path.join(__dirname, '../../assets');
@@ -28,14 +35,18 @@ const openWindow = (windowPath: string) => {
         },
         autoHideMenuBar: true,
         titleBarStyle: 'hidden',
-        titleBarOverlay: {
-            color: '#1e2024',
-            symbolColor: '#ffffffaa',
-            height: 40,
-        },
+        titleBarOverlay: options.hideOverlay
+            ? false
+            : {
+                  color: '#1e2024',
+                  symbolColor: '#ffffffaa',
+                  height: 40,
+              },
     });
 
-    window.loadURL(resolveHtmlPath(`index.html/${windowPath}`));
+    if (windowPath) {
+        window.loadURL(resolveHtmlPath(`index.html/${windowPath}`));
+    }
 
     window.on('ready-to-show', () => {
         if (!window) {
@@ -55,4 +66,10 @@ const openWindow = (windowPath: string) => {
     return index;
 };
 
+export const closeWindow = (id: number) => {
+    windows[id].close();
+    delete windows[id];
+};
+
 GADE.register('Window.Open', openWindow);
+GADE.register('Window.Close', closeWindow);

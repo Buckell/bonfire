@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Selection = styled.div`
     position: absolute;
@@ -13,6 +13,6 @@ export const Selection = styled.div`
     background-color: #1a1e21;
 
     z-index: 2000;
-    
+
     overflow: hidden;
 `;

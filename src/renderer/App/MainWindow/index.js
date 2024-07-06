@@ -21,9 +21,10 @@ import RightBar from './RightBar';
 import WindowMatrix from './WindowMatrix';
 import CommandBar from './CommandBar';
 import { tools } from '../tools';
+import { DialogIcon } from '../../../gade_shared/dialog';
 
 export default function MainWindow() {
-    document.title = 'DCSM Gateway';
+    document.title = 'Lightbox';
 
     return (
         <Background>
@@ -55,10 +56,33 @@ export default function MainWindow() {
                     <MenuItem title="Import Settings From..." />
                     <Divider />
                     <MenuItem title="Settings" icon={faCog} />
+                    <Divider />
                     <MenuItem
-                        title="Test"
+                        title="Exit"
                         action={() => {
-                            GADE.openWindow('test');
+                            GADE.openDialog(
+                                {
+                                    title: 'Confirm Exit',
+                                    description:
+                                        'Are you sure you want to exit?',
+                                    icon: DialogIcon.Info,
+                                    options: [
+                                        {
+                                            label: 'Exit',
+                                            action: 'exit',
+                                        },
+                                        {
+                                            label: 'Cancel',
+                                            action: 'close',
+                                        },
+                                    ],
+                                },
+                                (id, action) => {
+                                    if (action === 'close') {
+                                        GADE.closeDialog(id);
+                                    }
+                                },
+                            );
                         }}
                     />
                 </Menu>
@@ -68,9 +92,12 @@ export default function MainWindow() {
                         <Menu title="Unnamed Show 1 (unnamed1.bonfire)">
                             <MenuItem title="Unnamed Show 1 (unnamed1.bonfire)" />
                             <MenuItem title="Rumors 2023 (rumors2023.bonfire)" />
-                            <MenuItem action={() => {
-                                console.log('dsfdsaf!');
-                            }} title="Curtains 2022 (curtains2022.bonfire)" />
+                            <MenuItem
+                                action={() => {
+                                    console.log('dsfdsaf!');
+                                }}
+                                title="Curtains 2022 (curtains2022.bonfire)"
+                            />
                         </Menu>
                     </Menu>
                 </Menu>
@@ -84,12 +111,12 @@ export default function MainWindow() {
                 </Menu>
             </MenuBar>
 
-            <TopBar></TopBar>
-            <LeftBar></LeftBar>
-            <RightBar></RightBar>
-            <CommandBar></CommandBar>
+            <TopBar />
+            <LeftBar />
+            <RightBar />
+            <CommandBar />
 
-            <WindowMatrix></WindowMatrix>
+            <WindowMatrix />
         </Background>
     );
 }

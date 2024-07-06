@@ -1,5 +1,7 @@
 import { IpcMainEvent, ipcMain, BrowserWindow } from 'electron';
 
+const hooks: { [channel: string]: { [id: string]: Function } } = {};
+
 const GADE = {
     receive: (
         id: string,
@@ -32,6 +34,38 @@ const GADE = {
                 event.reply(channel, result);
             }
         });
+    },
+    hooks: {
+        add: (channel: string, id: string, callback: Function) => {
+            let channelHooks = hooks[channel];
+
+            if (channelHooks === undefined) {
+                // eslint-disable-next-line no-multi-assign
+                channelHooks = hooks[channel] = {};
+            }
+
+            channelHooks[id] = callback;
+        },
+        call: (channel: string, ...args: any[]) => {
+            Object.values(hooks[channel] || {}).forEach((callback) =>
+                callback(...args),
+            );
+        },
+        bridge: (channel: string) => {
+            GADE.hooks.add(
+                channel,
+                'GADE.TRANSMISSION_BRIDGE',
+                (...args: any[]) => {
+                    GADE.broadcast(channel, ...args);
+                },
+            );
+        },
+        dispatch: (channel: string) => {
+            GADE.receive(channel, (event: IpcMainEvent, ...args: any[]) => {
+                GADE.hooks.call(channel, ...args);
+            });
+        },
+        internal: hooks,
     },
 };
 

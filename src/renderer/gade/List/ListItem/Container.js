@@ -1,12 +1,11 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     position: relative;
 
-    width: calc(100% - 15px);
-    padding-left: 15px;
+    width: 100%;
 
-    font-family: "Inter", sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 12pt;
     font-weight: 300;
     color: white;
@@ -18,7 +17,7 @@ export const Container = styled.div`
             ::after {
                 display: block;
                 position: absolute;
-                content: "";
+                content: '';
                 width: 2px;
                 left: 7px;
                 top: 3px;
@@ -33,7 +32,7 @@ export const Container = styled.div`
         ::after {
             display: block;
             position: absolute;
-            content: "";
+            content: '';
             width: 2px;
             left: 7px;
             top: 3px;

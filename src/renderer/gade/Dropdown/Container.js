@@ -1,11 +1,12 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
     position: relative;
     display: inline-block;
+    width: 200px;
 
     p {
-        font-family: "Inter", sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 8pt;
         color: #aaaaaa;
         margin-bottom: 4px;

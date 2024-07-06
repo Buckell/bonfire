@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { resolveHtmlPath } from '../util';
 
-export const createMenuWindow = () => {
+export const createMenuWindow = (level: number = 0) => {
     const menuWindow = new BrowserWindow({
         minWidth: 10,
         minHeight: 10,
@@ -21,9 +21,11 @@ export const createMenuWindow = () => {
         alwaysOnTop: true,
     });
 
-    menuWindow.loadURL(resolveHtmlPath(`index.html/menu_frame`)).then(() => {
-        menuWindow.webContents.closeDevTools();
-    });
+    menuWindow
+        .loadURL(resolveHtmlPath(`index.html/menu_frame?${level}`))
+        .then(() => menuWindow.webContents.closeDevTools())
+        // eslint-disable-next-line no-console
+        .catch(console.error);
 
     menuWindow.setBackgroundColor('#00FFFFFF');
     menuWindow.setBackgroundMaterial('none');

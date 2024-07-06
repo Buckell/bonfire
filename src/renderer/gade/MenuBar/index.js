@@ -53,7 +53,7 @@ export default function MenuBar(props) {
         window.addEventListener('click', onClick);
 
         return () => window.removeEventListener('click', onClick);
-    }, [open, block]);
+    }, [open, block, onClick]);
 
     const findItems = (id, children) => {
         children = children || [];
@@ -114,6 +114,7 @@ export default function MenuBar(props) {
                                     openMenu(e, items);
                                 }
                             }}
+                            key={menu.props.title}
                         >
                             {menu.props.children}
                         </Menu>

@@ -31,7 +31,7 @@ export default function TopBar() {
         );
     };
 
-    GADE.addHook('Bonfire.PlayMode.Changed', 'PlayModeButton', setPlayMode);
+    GADE.hooks.add('Bonfire.PlayMode.Changed', 'PlayModeButton', setPlayMode);
 
     return (
         <Container

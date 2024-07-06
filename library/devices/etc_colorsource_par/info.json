@@ -1,0 +1,53 @@
+{
+    "name": "ColorSource PAR",
+    "manufacturer": "ETC - Electronic Theatre Controls, Inc.",
+    "address_mappings": [
+        "intensity 0 base",
+        "color 0 red",
+        "color 0 green",
+        "color 0 blue",
+        "void"
+    ],
+    "attribute_definitions": {
+        "intensity": [
+            {
+                "name": "Intensity"
+            }
+        ],
+        "color": [
+            {
+                "name": "Color"
+            }
+        ]
+    },
+    "attribute_display": [
+        {
+            "type": "intensity",
+            "index": 0,
+            "channels": [
+                {
+                    "label": "%",
+                    "channel": "percent"
+                }
+            ]
+        },
+        {
+            "type": "color",
+            "index": 0,
+            "channels": [
+                {
+                    "label": "R",
+                    "channel": "red"
+                },
+                {
+                    "label": "G",
+                    "channel": "green"
+                },
+                {
+                    "label": "B",
+                    "channel": "blue"
+                }
+            ]
+        }
+    ]
+}

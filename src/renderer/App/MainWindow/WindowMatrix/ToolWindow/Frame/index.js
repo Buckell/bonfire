@@ -3,8 +3,6 @@ import { Container } from './Container';
 
 export default function Frame(props) {
     return (
-        <Container {...props}>
-
-        </Container>
+        <Container {...props} />
     )
 }

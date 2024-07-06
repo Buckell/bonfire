@@ -3,8 +3,8 @@ import styled from 'styled-components';
 export const Container = styled.div`
     position: absolute;
     right: 0;
-    height: 30px;
-    width: 30px;
+    height: 40px;
+    width: 40px;
 
     background: #2b2f31;
     border-left: solid 1px #222;
@@ -13,7 +13,7 @@ export const Container = styled.div`
         color: #999999;
         height: 20px;
         width: 20px;
-        margin: 6px 5px 5px 5px;
+        margin: 10px 10px 8px 10px;
     }
 
     &:hover {

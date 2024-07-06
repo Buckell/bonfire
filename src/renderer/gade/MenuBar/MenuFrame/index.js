@@ -4,14 +4,14 @@ import Item from './Item';
 import Divider from './Divider';
 import GADE from '../../gade';
 
-let transmitCallback = () => {};
-
-GADE.receive('Menu.DataTransmit', (data) => transmitCallback(data));
+GADE.hooks.dispatch('Menu.DataTransmit');
 
 export default function MenuFrame(props) {
     const [menuData, setMenuData] = useState({});
 
-    transmitCallback = setMenuData;
+    GADE.hooks.add('Menu.DataTransmit', `CTX${props.param}`, (data) => {
+        setMenuData(data);
+    });
 
     return (
         <Container>

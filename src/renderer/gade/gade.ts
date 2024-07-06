@@ -1,27 +1,15 @@
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-
-export type MenuItem = {
-    label: string | undefined;
-    shortcut: string | undefined;
-    divider: boolean | undefined;
-    dropdown: MenuItem[] | undefined;
-    icon: IconDefinition | undefined;
-};
-
-export type MenuData = {
-    x: number;
-    y: number;
-    level: number;
-
-    items: MenuItem[];
-};
+import { Reducer } from '@reduxjs/toolkit';
+import { IpcMainEvent } from 'electron';
+import { MenuData } from '../../gade_shared/menu';
+import { reducers } from './reducers';
+import { DialogData } from '../../gade_shared/dialog';
 
 export enum MenuPosition {
     Right,
     Bottom,
 }
 
-const hooks: any = {};
+const hooks: { [channel: string]: { [id: string]: Function } } = {};
 
 const GADE = {
     receiveOnce: (id: string, callback: (...args: any[]) => void) =>
@@ -50,7 +38,28 @@ const GADE = {
     },
     openMenu: (data: MenuData) => GADE.call('Menu.Open', data),
     closeMenu: (level: number) => GADE.call('Menu.Close', level),
-    openWindow: (path: string) => GADE.call('Window.Open', path),
+    openWindow: (path: string) =>
+        GADE.call('Window.Open', path) as Promise<number>,
+    openDialog: (
+        data: DialogData,
+        onAction: (id: number, action: string) => void,
+    ) =>
+        (GADE.call('Dialog.Open', data) as Promise<number>).then(
+            (id: number) => {
+                GADE.hooks.add(
+                    'Dialog.Action',
+                    `DIALOG${id}`,
+                    (actionId: number, action: string) => {
+                        if (actionId === id) {
+                            onAction(id, action);
+                        }
+                    },
+                );
+
+                return id;
+            },
+        ),
+    closeDialog: (id: number) => GADE.call('Dialog.Close', id),
     getContextMenuPosition: (event: MouseEvent) => [
         event.screenX,
         event.screenY - 10,
@@ -87,24 +96,57 @@ const GADE = {
 
         return GADE.getContextMenuPosition(event);
     },
-    addHook: (channel: string, id: string, callback: Function) => {
-        let channelHooks = hooks[channel];
+    // eslint-disable-next-line no-return-assign
+    registerReducer: (name: string, reducer: Reducer) =>
+        (reducers[name] = reducer),
+    hooks: {
+        add: (channel: string, id: string, callback: Function) => {
+            let channelHooks = hooks[channel];
 
-        if (channelHooks === undefined) {
-            // eslint-disable-next-line no-multi-assign
-            channelHooks = hooks[channel] = {};
+            if (channelHooks === undefined) {
+                // eslint-disable-next-line no-multi-assign
+                channelHooks = hooks[channel] = {};
+            }
 
-            GADE.receive(channel, (...args: any[]) =>
-                GADE.callHook(channel, ...args),
+            channelHooks[id] = callback;
+        },
+        call: (channel: string, ...args: any[]) => {
+            Object.values(hooks[channel] || {}).forEach((callback) =>
+                callback(...args),
             );
-        }
+        },
+        bridge: (channel: string) => {
+            GADE.hooks.add(
+                channel,
+                'GADE.TRANSMISSION_BRIDGE',
+                (...args: any[]) => {
+                    GADE.send(channel, ...args);
+                },
+            );
+        },
+        dispatch: (channel: string) => {
+            let channelHooks = hooks[channel];
 
-        channelHooks[id] = callback;
+            if (channelHooks?.DISPATCH !== undefined) {
+                return;
+            }
+
+            if (channelHooks === undefined) {
+                // eslint-disable-next-line no-multi-assign
+                channelHooks = hooks[channel] = {};
+            }
+
+            channelHooks.DISPATCH = () => {};
+
+            GADE.receive(channel, (...args: any[]) => {
+                GADE.hooks.call(channel, ...args);
+            });
+        },
+        internal: hooks,
     },
-    callHook: (channel: string, ...args: any[]) =>
-        Object.values(hooks[channel] || {}).forEach((hook: any) =>
-            hook(...args),
-        ),
 };
+
+GADE.hooks.dispatch('Menu.Action');
+GADE.hooks.dispatch('Dialog.Action');
 
 export default GADE;

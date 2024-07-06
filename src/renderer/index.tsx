@@ -1,12 +1,15 @@
-import React, { DOMElement } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import App from './App';
-import GADE, { MenuItem } from './gade/gade';
+import GADE from './gade/gade';
 import { paths } from './gade/registry';
 
 import './gade/fonts.css';
 import './gade/scroll.css';
+import { MenuItem } from '../gade_shared/menu';
+import store from './gade/store';
 
 const path = window.location.pathname;
 
@@ -18,7 +21,7 @@ window.addEventListener('contextmenu', (event: MouseEvent) => {
 
     const [x, y] = GADE.getContextMenuPosition(event);
 
-    let { target } = event;
+    let { target }: { target: any } = event;
     let elementContextMenu: MenuItem[] = [];
 
     while (target && target !== document.body) {
@@ -43,17 +46,9 @@ window.addEventListener('contextmenu', (event: MouseEvent) => {
     const items = elementContextMenu.concat([
         {
             label: 'Copy',
-            shortcut: '',
-            divider: false,
-            icon: undefined,
-            dropdown: [],
         },
         {
             label: 'Paste',
-            shortcut: '',
-            divider: false,
-            icon: undefined,
-            dropdown: [],
         },
     ]);
 
@@ -68,19 +63,26 @@ window.addEventListener('contextmenu', (event: MouseEvent) => {
 require('./App/register');
 
 function Window() {
-    const Element: any = paths[path.substring(12)] || App;
+    const parts = path.substring(12).replaceAll('%3F', '?').split('?');
+    const [queryPath, queryParameter]: string[] = [
+        parts[0],
+        decodeURI(parts.slice(1).join('?')).replaceAll('<P>', '.'),
+    ];
+    const Element: any = paths[queryPath] || App;
 
-    return <Element />;
+    return <Element param={queryParameter} />;
 }
 
 root.render(
     <React.StrictMode>
         <MemoryRouter>
-            <Routes>
-                <Route path="/">
-                    <Route index element={<Window />} />
-                </Route>
-            </Routes>
+            <Provider store={store}>
+                <Routes>
+                    <Route path="/">
+                        <Route index element={<Window />} />
+                    </Route>
+                </Routes>
+            </Provider>
         </MemoryRouter>
     </React.StrictMode>,
 );
