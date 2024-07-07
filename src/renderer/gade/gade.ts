@@ -1,5 +1,6 @@
 import { Reducer } from '@reduxjs/toolkit';
 import { IpcMainEvent } from 'electron';
+import { useEffect, useState } from 'react';
 import { MenuData } from '../../gade_shared/menu';
 import { reducers } from './reducers';
 import { DialogData } from '../../gade_shared/dialog';
@@ -144,9 +145,42 @@ const GADE = {
         },
         internal: hooks,
     },
+    shared: {
+        retrieve: <T>(id: string) =>
+            GADE.call('Shared.Retrieve', id) as Promise<T | null | undefined>,
+        set: <T>(id: string, value: T | null | undefined) => {
+            GADE.call('Shared.Set', id, value);
+        },
+        useValue: <T>(id: string, listenerId: string) => {
+            const [value, setValue] = useState<T | null>();
+
+            useEffect(() => {
+                GADE.shared.retrieve<T>(id).then(setValue);
+            }, [id, setValue]);
+
+            useEffect(() => {
+                if (value) {
+                    GADE.shared.set<T>(id, value);
+                }
+            }, [id, value]);
+
+            GADE.hooks.add(
+                'Shared.Changed',
+                listenerId,
+                (changedId: string, changedValue: any) => {
+                    if (changedId === id) {
+                        setValue(changedValue);
+                    }
+                },
+            );
+
+            return [value, setValue];
+        },
+    },
 };
 
 GADE.hooks.dispatch('Menu.Action');
 GADE.hooks.dispatch('Dialog.Action');
+GADE.hooks.dispatch('Shared.Changed');
 
 export default GADE;

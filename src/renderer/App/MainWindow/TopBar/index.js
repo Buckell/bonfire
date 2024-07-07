@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Container } from './Container';
 import Button from '../../../gade/Button';
 import Typography from '../../../gade/Typography';
@@ -6,7 +5,7 @@ import { PlayMode } from '../../../../app_shared/bonfire';
 import GADE from '../../../gade/gade';
 
 export default function TopBar() {
-    const [playMode, setPlayMode] = useState(PlayMode.Live);
+    const [playMode, setPlayMode] = GADE.shared.useValue('Bonfire.PlayMode', 'TOPBAR');
 
     const playModeConfiguration = {};
 
@@ -22,21 +21,16 @@ export default function TopBar() {
         barColor: '#13A',
     };
 
-    const currentConfiguration = playModeConfiguration[playMode];
-
-    const changePlayMode = () => {
-        GADE.send(
-            'Bonfire.PlayMode.Set',
+    const togglePlayMode = () => {
+        setPlayMode(
             playMode === PlayMode.Live ? PlayMode.Blind : PlayMode.Live,
         );
     };
 
-    GADE.hooks.add('Bonfire.PlayMode.Changed', 'PlayModeButton', setPlayMode);
-
     return (
         <Container
             style={{
-                borderTop: `solid 2px ${currentConfiguration.barColor}`,
+                borderTop: `solid 2px ${playModeConfiguration[playMode]?.barColor}`,
             }}
         >
             <div>
@@ -65,18 +59,18 @@ export default function TopBar() {
                 </div>
             </div>
             <div>
-                <Button onClick={changePlayMode}>
+                <Button onClick={togglePlayMode}>
                     <span
                         style={{
                             display: 'inline-block',
                             width: '7px',
                             height: '7px',
-                            background: `${currentConfiguration.buttonColor}`,
+                            background: `${playModeConfiguration[playMode]?.buttonColor}`,
                             borderRadius: '100%',
                             margin: '0 8px 1px 0',
                         }}
                     />
-                    {currentConfiguration.title}
+                    {playModeConfiguration[playMode]?.title}
                 </Button>
             </div>
         </Container>

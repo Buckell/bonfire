@@ -14,13 +14,12 @@ import {
 import { devices } from './devices';
 import DCSM from './outputs/dcsm';
 import { MainConfiguration as DcsmMainConfiguration } from '../../app_shared/dcsm';
+import { SharedValue } from '../shared';
 
 GADE.hooks.bridge('Bonfire.PlayMode.Changed');
 GADE.hooks.bridge('Bonfire.Channel.Update');
 
 export default class Bonfire {
-    playMode: PlayMode = PlayMode.Live;
-
     universes: { [num: number]: Buffer } = {};
 
     channels: { [channelNumber: number]: Channel } = {};
@@ -29,8 +28,12 @@ export default class Bonfire {
 
     dcsmOutput?: DCSM;
 
+    playMode: SharedValue<PlayMode> = GADE.shared.use(
+        'Bonfire.PlayMode',
+        PlayMode.Live,
+    );
+
     constructor() {
-        this.setupPlayModeReceiver();
         this.setupClientDataHandlers();
 
         this.createChannel(1, 'dimmer_simple', 1);
@@ -69,17 +72,6 @@ export default class Bonfire {
 
     deleteChannel(channelNumber: number) {
         delete this.channels[channelNumber];
-    }
-
-    setPlayMode(mode: PlayMode) {
-        this.playMode = mode;
-        GADE.hooks.call('Bonfire.PlayMode.Changed', mode);
-    }
-
-    setupPlayModeReceiver() {
-        GADE.receive('Bonfire.PlayMode.Set', (e, mode: PlayMode) =>
-            this.setPlayMode(mode),
-        );
     }
 
     setChannelAttributeChannel(
