@@ -1,9 +1,13 @@
 import TRANSMISSION from './transmission';
+import HOOKS from './hooks';
 
-class SharedValue<T> {
+export class SharedValue<T> {
+    id: string;
+
     internalValue: T | null | undefined = undefined;
 
-    constructor(initialValue: T | null | undefined) {
+    constructor(id: string, initialValue: T | null | undefined) {
+        this.id = id;
         this.internalValue = initialValue;
     }
 
@@ -14,7 +18,7 @@ class SharedValue<T> {
     set value(newValue: T | null | undefined) {
         this.internalValue = newValue;
 
-        TRANSMISSION.broadcast('Shared.Changed');
+        HOOKS.call('Shared.Changed', this.id, newValue);
     }
 }
 
@@ -23,7 +27,7 @@ export const values: { [id: string]: SharedValue<any> } = {};
 const SHARED = {
     use: <T>(id: string, value: T | null | undefined) => {
         if (values[id] === undefined) {
-            const sharedValue: SharedValue<T> = new SharedValue<T>(value);
+            const sharedValue: SharedValue<T> = new SharedValue<T>(id, value);
             values[id] = sharedValue;
             return sharedValue;
         }
@@ -50,5 +54,7 @@ TRANSMISSION.register('Shared.Set', (id: string, value: any) => {
         sharedValue.value = value;
     }
 });
+
+HOOKS.bridge('Shared.Changed');
 
 export default SHARED;
