@@ -12,6 +12,8 @@ export enum MenuPosition {
 
 const hooks: { [channel: string]: { [id: string]: Function } } = {};
 
+let sessionId = 0;
+
 const GADE = {
     receiveOnce: (id: string, callback: (...args: any[]) => void) =>
         window.electron.ipcRenderer.once(id, callback),
@@ -21,19 +23,21 @@ const GADE = {
         window.electron.ipcRenderer.sendMessage(id, ...args),
     call: (channel: string, ...args: any[]) =>
         new Promise((resolve) => {
-            GADE.send(channel, ...args);
-            GADE.receiveOnce(channel, resolve);
+            GADE.send(channel, ++sessionId, ...args);
+            GADE.receiveOnce(`R${sessionId}: ${channel}`, resolve);
         }),
     register: (channel: string, callback: Function) => {
-        GADE.receive(channel, (event, ...args) => {
+        GADE.receive(channel, (event, sessionId, ...args) => {
             const result = callback(...args);
+
+            const replyChannel = `R${sessionId}: ${channel}`;
 
             if (result instanceof Promise) {
                 result
-                    .then((value) => event.reply(channel, value))
-                    .catch(() => event.reply(channel, undefined));
+                    .then((value) => event.reply(replyChannel, value))
+                    .catch(() => event.reply(replyChannel, undefined));
             } else {
-                event.reply(channel, result);
+                event.reply(replyChannel, result);
             }
         });
     },
@@ -166,7 +170,7 @@ const GADE = {
 
             GADE.hooks.add(
                 'Shared.Changed',
-                listenerId,
+                `${listenerId}: ${id}`,
                 (changedId: string, changedValue: any) => {
                     if (changedId === id) {
                         setValue(changedValue);

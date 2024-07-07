@@ -90,7 +90,7 @@ const openMenu = (data: MenuData) => {
 
     currentLevel = data.level;
 
-    GADE.call('Menu.DataTransmit', selectedMenu, data);
+    GADE.send('Menu.DataTransmit', selectedMenu, data);
 
     if (!selectedMenu) {
         return;
