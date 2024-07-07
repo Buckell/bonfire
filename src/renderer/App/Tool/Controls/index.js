@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Container } from './Container';
 import Fader from '../../component/Fader';
 import { Bonfire } from '../../bonfire';
-import { useEffect, useState } from 'react';
+import clamp from '../../../../app_shared/util/clamp';
 
 export default function Controls() {
     const [selectedChannels] = Bonfire.useSelectedChannels();
@@ -11,19 +12,20 @@ export default function Controls() {
     useEffect(() => {
         if (selectedChannels > 0) {
             Bonfire.getChannel(selectedChannels[0]).then((channel) => {
-                setIntensity(channel?.attributes?.intensity?.[0].channels.percent);
+                setIntensity(
+                    channel?.attributes?.intensity?.[0].channels.percent,
+                );
             });
         }
     }, [selectedChannels]);
 
     useEffect(() => {
-        console.log(intensity);
         Bonfire.setChannelsAttributeChannel(
             selectedChannels,
             ['intensity', 0, 'percent'],
-            intensity
+            intensity,
         );
-    }, [intensity]);
+    }, [intensity, selectedChannels]);
 
     return (
         <Container>
@@ -31,8 +33,14 @@ export default function Controls() {
                 label="Intensity"
                 value={intensity}
                 onChange={(e) => {
-                    console.log('d');
-                    setIntensity(parseInt(e.target.value, 10))
+                    const inputNumber = parseInt(e.target.value, 10);
+                    clamp(
+                        setIntensity(
+                            Number.isNaN(inputNumber) ? 0 : inputNumber,
+                        ) || 0,
+                        0,
+                        100,
+                    );
                 }}
             />
         </Container>
