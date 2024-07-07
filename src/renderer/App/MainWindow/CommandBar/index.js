@@ -3,14 +3,16 @@ import { Container } from './Container';
 import Button from '../../../gade/Button';
 import Input from '../../../gade/Input';
 import Tooltip from '../../../gade/Tooltip';
+import ControlCommandProcessor from './ControlCommandProcessor';
+import ManualCommandProcessor from './ManualCommandProcessor';
+import GADE from '../../../gade/gade';
+import { CommandMode } from '../../../../main/app/command_processing/CommandMode';
 
 export default function CommandBar() {
-    const [mode, setMode] = useState('QUICK');
+    const [mode, setMode] = GADE.shared.useValue('Bonfire.CommandMode', 'COMMAND_BAR');
 
     const switchMode = () =>
-        setMode((m) => {
-            return m === 'MANUAL' ? 'QUICK' : 'MANUAL';
-        });
+        setMode(mode === CommandMode.Control ? CommandMode.Manual : CommandMode.Control);
 
     return (
         <Container>
@@ -28,28 +30,21 @@ export default function CommandBar() {
                             left: 0,
                             height: '30px',
                             borderRadius: '0',
-                            width: '80px',
+                            width: '90px',
                         }}
                         buttonStyle={{
                             cursor: 'default',
                         }}
                         onClick={switchMode}
                     >
-                        {mode}
+                        {mode === CommandMode.Control ? 'CONTROL' : 'MANUAL'}
                     </Button>
                 </Tooltip>
-                <Input
-                    style={{
-                        position: 'absolute',
-                        left: '80px',
-                        width: 'calc(100% - 80px)',
-                        borderRadius: '0',
-                        fontWeight: '400',
-                        fontSize: '11pt',
-                        paddingTop: 0,
-                        paddingBottom: 0,
-                    }}
-                />
+                {
+                    mode === CommandMode.Control ?
+                    <ControlCommandProcessor /> :
+                    <ManualCommandProcessor />
+                }
             </div>
         </Container>
     );

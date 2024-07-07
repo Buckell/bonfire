@@ -13,6 +13,7 @@ export default function Input(props) {
         doubleClickRequired,
         readOnly,
         onBlur,
+        noEnterBlur,
     } = props;
 
     const [readOnlyState, setReadOnlyState] = useState(
@@ -38,7 +39,7 @@ export default function Input(props) {
                     }
                 }}
                 onKeyUp={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !noEnterBlur) {
                         e.target.blur();
                     }
                 }}

@@ -15,6 +15,9 @@ import { devices } from './devices';
 import DCSM from './outputs/dcsm';
 import { MainConfiguration as DcsmMainConfiguration } from '../../app_shared/dcsm';
 import { SharedValue } from '../shared';
+import ControlCommandProcessor from './command_processing/ControlCommandProcessor';
+import ManualCommandProcessor from './command_processing/ManualCommandProcessor';
+import { CommandMode } from './command_processing/CommandMode';
 
 GADE.hooks.bridge('Bonfire.PlayMode.Changed');
 GADE.hooks.bridge('Bonfire.Channel.Update');
@@ -32,6 +35,15 @@ export default class Bonfire {
         'Bonfire.PlayMode',
         PlayMode.Live,
     );
+
+    commandMode: SharedValue<string> = GADE.shared.use(
+        'Bonfire.CommandMode',
+        CommandMode.Control,
+    )
+
+    controlCommandProcessor: ControlCommandProcessor = new ControlCommandProcessor();
+
+    manualCommandProcessor: ManualCommandProcessor = new ManualCommandProcessor();
 
     constructor() {
         this.setupClientDataHandlers();
