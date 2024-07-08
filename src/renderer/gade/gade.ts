@@ -1,5 +1,5 @@
 import { Reducer } from '@reduxjs/toolkit';
-import { IpcMainEvent } from 'electron';
+import { IpcMainEvent, OpenDialogOptions, OpenDialogReturnValue } from 'electron';
 import { useEffect, useState } from 'react';
 import { MenuData } from '../../gade_shared/menu';
 import { reducers } from './reducers';
@@ -65,6 +65,8 @@ const GADE = {
             },
         ),
     closeDialog: (id: number) => GADE.call('Dialog.Close', id),
+    openFileDialog: (options?: OpenDialogOptions) =>
+        GADE.call('FileDialog.Open') as Promise<OpenDialogReturnValue>,
     getContextMenuPosition: (event: MouseEvent) => [
         event.screenX,
         event.screenY - 10,

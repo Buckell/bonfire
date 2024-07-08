@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { dialog, OpenDialogOptions, BrowserWindow } from 'electron';
 import GADE from './gade';
 import { closeWindow, openWindow, windows } from './window';
 import { DialogData } from '../gade_shared/dialog';
@@ -44,3 +44,9 @@ GADE.register('Dialog.Close', (id: number) => {
 GADE.receive('Dialog.Action', (event, id: number, action: string) => {
     GADE.broadcast('Dialog.Action', id, action);
 });
+
+GADE.register('FileDialog.Open', (options?: OpenDialogOptions) =>
+    dialog.showOpenDialog(options || {
+        properties: ['openFile'],
+    })
+);
