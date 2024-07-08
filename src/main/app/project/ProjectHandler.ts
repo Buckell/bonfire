@@ -24,6 +24,11 @@ export default class ProjectHandler {
         SaveStatus.Created,
     );
 
+    projects: SharedValue<ProjectData[]> = GADE.shared.use<ProjectData[]>(
+        'Bonfire.Project.Projects',
+        []
+    );
+
     projectCreationDate?: Date;
 
     projectCreateWindowId: number = -1;
@@ -43,6 +48,53 @@ export default class ProjectHandler {
         GADE.register('Bonfire.Project.Create', this.createProject.bind(this));
         GADE.register('Bonfire.Project.Save', this.save.bind(this));
         GADE.register('Bonfire.Project.Open', this.open.bind(this));
+
+        this.setupProjectsHandler();
+    }
+
+    setupProjectsHandler() {
+        const projectsFilePath = path.resolve(DIRECTORIES.DATA, 'projects.json');
+
+        fs.readFile(projectsFilePath).then(async (content) => {
+            const data = JSON.parse(String(content));
+
+            if (data.projects === undefined) {
+                return;
+            }
+
+            this.projects.value = (await Promise.all(data.projects.map(async (project: any) => {
+                let exists = true;
+
+                await fs.stat(project.path).catch(() => {
+                    exists = false;
+                });
+
+                if (!exists) {
+                    return null;
+                }
+
+                return project;
+            })))
+                .filter((p: any) => p !== null)
+                .map((project: any): ProjectData => ({
+                    ...project,
+                    creation: new Date(project.creation),
+                    latestAccess: new Date(project.latestAccess),
+                }));
+
+            console.log('[BONFIRE] Projects manifest loaded.');
+            console.log(this.projects.value);
+        });
+
+        GADE.hooks.add('Shared.Changed', 'PROJECT_HANDLER_PROJECTS', (id: string, newValue: string) => {
+            fs.writeFile(projectsFilePath, JSON.stringify({
+                projects: this.projects.value?.map((data) => ({
+                    ...data,
+                    creation: data.creation?.getTime(),
+                    latestAccess: data.latestAccess?.getTime(),
+                })),
+            }));
+        });
     }
 
     promptCreateProject() {
@@ -72,6 +124,7 @@ export default class ProjectHandler {
         this.projectCreationDate = new Date();
 
         await this.save();
+        await this.load();
     }
 
     generateWriteInfo() {
@@ -112,9 +165,14 @@ export default class ProjectHandler {
         if (this.projectPath.value) {
             this.saveStatus.value = SaveStatus.Saving;
 
-            await archiveFolder(DIRECTORIES.PROJECT_WORKING, this.projectPath.value).then(() => {
-                this.saveStatus.value = SaveStatus.Saved;
-            }).catch(console.error);
+            await archiveFolder(
+                DIRECTORIES.PROJECT_WORKING,
+                this.projectPath.value,
+            )
+                .then(() => {
+                    this.saveStatus.value = SaveStatus.Saved;
+                })
+                .catch(console.error);
         }
     }
 
@@ -136,6 +194,21 @@ export default class ProjectHandler {
         if (this.projectPath.value) {
             await extract(this.projectPath.value, DIRECTORIES.PROJECT_WORKING);
             await this.read();
+
+            if (!this.projectPath.value || !this.projectName.value || !this.projectCreationDate) {
+                return;
+            }
+
+            this.projects.value = [
+                ...(this.projects.value || []).filter((project: ProjectData) => project.path !== this.projectPath.value),
+                {
+                    name: this.projectName.value,
+                    path: this.projectPath.value,
+                    creation: this.projectCreationDate,
+                    latestAccess: new Date(),
+                }
+            ];
+
         }
     }
 }
