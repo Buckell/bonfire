@@ -1,4 +1,5 @@
 import '../../../gade/fonts.css';
+import { useEffect, useState } from 'react';
 import { Background } from '../../../gade/Background';
 import MenuBar from '../../../gade/MenuBar';
 import { MenuIcon } from '../../../gade/MenuBar/MenuIcon';
@@ -8,7 +9,6 @@ import Input from '../../../gade/Input';
 import Typography from '../../../gade/Typography';
 import Button from '../../../gade/Button';
 import GADE from '../../../gade/gade';
-import { useEffect, useState } from 'react';
 import { Bonfire } from '../../bonfire';
 
 export default function ProjectCreate() {
@@ -16,7 +16,7 @@ export default function ProjectCreate() {
 
     const [directories] = GADE.shared.useValue(
         'Bonfire.Directories',
-        'PROJECT_CREATE'
+        'PROJECT_CREATE',
     );
 
     const [name, setName] = useState('Unnamed Project');
@@ -60,7 +60,7 @@ export default function ProjectCreate() {
                     style={{
                         display: 'inline-block',
                         marginRight: '10px',
-                        width: '400px'
+                        width: '400px',
                     }}
                     value={path}
                     onChange={(e) => {
@@ -78,8 +78,8 @@ export default function ProjectCreate() {
                                 {
                                     name: 'Bonfire Project',
                                     extensions: ['bonfire'],
-                                }
-                            ]
+                                },
+                            ],
                         }).then((response) => {
                             if (!response.canceled) {
                                 setPathChanged(true);
@@ -87,7 +87,9 @@ export default function ProjectCreate() {
                             }
                         });
                     }}
-                >...</Button>
+                >
+                    ...
+                </Button>
 
                 <Button
                     style={{

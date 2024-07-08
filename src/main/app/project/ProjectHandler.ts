@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'node:fs/promises';
+import { archiveFolder, extract } from 'zip-lib';
 import { SharedValue } from '../../shared';
 import GADE from '../../gade';
 import { SaveStatus } from './SaveStatus';
-import { archiveFolder, extract } from 'zip-lib';
 import { DIRECTORIES } from '../directories';
 import { openWindow, windows } from '../../window';
 import { ProjectData } from './ProjectData';
@@ -26,7 +26,7 @@ export default class ProjectHandler {
 
     projects: SharedValue<ProjectData[]> = GADE.shared.use<ProjectData[]>(
         'Bonfire.Project.Projects',
-        []
+        [],
     );
 
     projectCreationDate?: Date;
@@ -44,7 +44,10 @@ export default class ProjectHandler {
             },
         );
 
-        GADE.register('Bonfire.Project.PromptCreate', this.promptCreateProject.bind(this));
+        GADE.register(
+            'Bonfire.Project.PromptCreate',
+            this.promptCreateProject.bind(this),
+        );
         GADE.register('Bonfire.Project.Create', this.createProject.bind(this));
         GADE.register('Bonfire.Project.Save', this.save.bind(this));
         GADE.register('Bonfire.Project.Open', this.open.bind(this));
@@ -53,7 +56,10 @@ export default class ProjectHandler {
     }
 
     setupProjectsHandler() {
-        const projectsFilePath = path.resolve(DIRECTORIES.DATA, 'projects.json');
+        const projectsFilePath = path.resolve(
+            DIRECTORIES.DATA,
+            'projects.json',
+        );
 
         fs.readFile(projectsFilePath).then(async (content) => {
             const data = JSON.parse(String(content));
@@ -62,51 +68,61 @@ export default class ProjectHandler {
                 return;
             }
 
-            this.projects.value = (await Promise.all(data.projects.map(async (project: any) => {
-                let exists = true;
+            this.projects.value = (
+                await Promise.all(
+                    data.projects.map(async (project: any) => {
+                        let exists = true;
 
-                await fs.stat(project.path).catch(() => {
-                    exists = false;
-                });
+                        await fs.stat(project.path).catch(() => {
+                            exists = false;
+                        });
 
-                if (!exists) {
-                    return null;
-                }
+                        if (!exists) {
+                            return null;
+                        }
 
-                return project;
-            })))
+                        return project;
+                    }),
+                )
+            )
                 .filter((p: any) => p !== null)
-                .map((project: any): ProjectData => ({
-                    ...project,
-                    creation: new Date(project.creation),
-                    latestAccess: new Date(project.latestAccess),
-                }));
+                .map(
+                    (project: any): ProjectData => ({
+                        ...project,
+                        creation: new Date(project.creation),
+                        latestAccess: new Date(project.latestAccess),
+                    }),
+                );
 
             console.log('[BONFIRE] Projects manifest loaded.');
             console.log(this.projects.value);
         });
 
-        GADE.hooks.add('Shared.Changed', 'PROJECT_HANDLER_PROJECTS', (id: string, newValue: string) => {
-            fs.writeFile(projectsFilePath, JSON.stringify({
-                projects: this.projects.value?.map((data) => ({
-                    ...data,
-                    creation: data.creation?.getTime(),
-                    latestAccess: data.latestAccess?.getTime(),
-                })),
-            }));
-        });
+        GADE.hooks.add(
+            'Shared.Changed',
+            'PROJECT_HANDLER_PROJECTS',
+            (id: string, newValue: string) => {
+                fs.writeFile(
+                    projectsFilePath,
+                    JSON.stringify({
+                        projects: this.projects.value?.map((data) => ({
+                            ...data,
+                            creation: data.creation?.getTime(),
+                            latestAccess: data.latestAccess?.getTime(),
+                        })),
+                    }),
+                );
+            },
+        );
     }
 
     promptCreateProject() {
-        this.projectCreateWindowId = openWindow(
-            'project/create',
-            {
-                width: 500,
-                height: 500,
-                noDevTools: true,
-                resizable: false,
-            },
-        );
+        this.projectCreateWindowId = openWindow('project/create', {
+            width: 500,
+            height: 500,
+            noDevTools: true,
+            resizable: false,
+        });
 
         windows[this.projectCreateWindowId].on('close', () => {
             this.projectCreateWindowId = -1;
@@ -119,7 +135,7 @@ export default class ProjectHandler {
         }
 
         this.projectName.value = projectData.name;
-        this.projectPath.value = projectData.path;
+        this.projectPath.value = path.resolve(projectData.path);
 
         this.projectCreationDate = new Date();
 
@@ -142,14 +158,14 @@ export default class ProjectHandler {
             fs.writeFile(
                 path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'),
                 JSON.stringify(this.generateWriteInfo()),
-            )
+            ),
         ]).then(() => {
             this.saveStatus.value = SaveStatus.Unsaved;
         });
     }
 
     async read() {
-        fs.readFile(
+        await fs.readFile(
             path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'),
         ).then((content) => {
             const data = JSON.parse(String(content));
@@ -195,20 +211,26 @@ export default class ProjectHandler {
             await extract(this.projectPath.value, DIRECTORIES.PROJECT_WORKING);
             await this.read();
 
-            if (!this.projectPath.value || !this.projectName.value || !this.projectCreationDate) {
+            if (
+                !this.projectPath.value ||
+                !this.projectName.value ||
+                !this.projectCreationDate
+            ) {
                 return;
             }
 
             this.projects.value = [
-                ...(this.projects.value || []).filter((project: ProjectData) => project.path !== this.projectPath.value),
+                ...(this.projects.value || []).filter(
+                    (project: ProjectData) =>
+                        path.resolve(project.path) !== path.resolve(this.projectPath.value || ''),
+                ),
                 {
                     name: this.projectName.value,
                     path: this.projectPath.value,
                     creation: this.projectCreationDate,
                     latestAccess: new Date(),
-                }
+                },
             ];
-
         }
     }
 }

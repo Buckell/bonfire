@@ -27,6 +27,15 @@ import { Bonfire } from '../bonfire';
 export default function MainWindow() {
     document.title = 'Lightbox';
 
+    const [projects] = GADE.shared.useValue(
+        'Bonfire.Project.Projects',
+        'MAIN_WINDOW',
+    );
+
+    const recentAccess = projects?.sort((p1, p2) => {
+        return p2.latestAccess - p1.latestAccess;
+    });
+
     return (
         <Background>
             <MenuBar>
@@ -49,13 +58,16 @@ export default function MainWindow() {
                                     {
                                         name: 'Bonfire Project',
                                         extensions: ['bonfire'],
-                                    }
-                                ]
+                                    },
+                                ],
                             }).then((response) => {
-                                if (!response.canceled && response.filePaths.length > 0) {
+                                if (
+                                    !response.canceled &&
+                                    response.filePaths.length > 0
+                                ) {
                                     Bonfire.project.open(response.filePaths[0]);
                                 }
-                            })
+                            });
                         }}
                     />
                     <MenuItem
@@ -66,9 +78,34 @@ export default function MainWindow() {
                         }}
                     />
                     <Menu title="Recent Projects">
-                        <MenuItem title="Unnamed Show 1 (unnamed1.bonfire)" />
-                        <MenuItem title="Rumors 2023 (rumors2023.bonfire)" />
-                        <MenuItem title="Curtains 2022 (curtains2022.bonfire)" />
+                        {recentAccess?.map((project) => (
+                            <MenuItem
+                                key={project.path}
+                                title={`${project.name} (${project.path})`}
+                                action={() => {
+                                    GADE.openDialog({
+                                        title: 'Confirm Open',
+                                        description: `Are you sure you want to open '${project.name}'?`,
+                                        options: [
+                                            {
+                                                label: 'Open',
+                                                action: 'open',
+                                            },
+                                            {
+                                                label: 'Cancel',
+                                                action: 'close',
+                                            },
+                                        ],
+                                    }, (id, action) => {
+                                        GADE.closeDialog(id);
+
+                                        if (action === 'open') {
+                                            Bonfire.project.open(project.path);
+                                        }
+                                    });
+                                }}
+                            />
+                        ))}
                     </Menu>
                     <Divider />
                     <MenuItem title="Import Settings From..." />
