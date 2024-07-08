@@ -22,6 +22,7 @@ import WindowMatrix from './WindowMatrix';
 import CommandBar from './CommandBar';
 import { tools } from '../tools';
 import { DialogIcon } from '../../../gade_shared/dialog';
+import { Bonfire } from '../bonfire';
 
 export default function MainWindow() {
     document.title = 'Lightbox';
@@ -35,9 +36,7 @@ export default function MainWindow() {
                     <MenuItem
                         title="New Project"
                         icon={faAdd}
-                        action={() => {
-                            console.log('New Project!');
-                        }}
+                        action={Bonfire.project.promptCreation}
                     />
                     <MenuItem
                         title="Open..."

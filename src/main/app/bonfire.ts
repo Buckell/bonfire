@@ -18,6 +18,9 @@ import { SharedValue } from '../shared';
 import ControlCommandProcessor from './command_processing/ControlCommandProcessor';
 import ManualCommandProcessor from './command_processing/ManualCommandProcessor';
 import { CommandMode } from './command_processing/CommandMode';
+import ProjectHandler from './project/ProjectHandler';
+import fs from 'node:fs/promises';
+import { DIRECTORIES } from './directories';
 
 GADE.hooks.bridge('Bonfire.PlayMode.Changed');
 GADE.hooks.bridge('Bonfire.Channel.Update');
@@ -39,13 +42,23 @@ export default class Bonfire {
     commandMode: SharedValue<string> = GADE.shared.use(
         'Bonfire.CommandMode',
         CommandMode.Control,
-    )
+    );
 
-    controlCommandProcessor: ControlCommandProcessor = new ControlCommandProcessor();
+    controlCommandProcessor: ControlCommandProcessor =
+        new ControlCommandProcessor();
 
-    manualCommandProcessor: ManualCommandProcessor = new ManualCommandProcessor();
+    manualCommandProcessor: ManualCommandProcessor =
+        new ManualCommandProcessor();
+
+    projectHandler: ProjectHandler = new ProjectHandler();
+
+    directories: SharedValue<{ [key: string ]: string }> = GADE.shared.use(
+        'Bonfire.Directories',
+        DIRECTORIES,
+    );
 
     constructor() {
+        this.createDirectories();
         this.setupClientDataHandlers();
 
         this.createChannel(1, 'dimmer_simple', 1);
@@ -95,10 +108,17 @@ export default class Bonfire {
 
         if (channel) {
             const [type, index, attrChannel] = attributeChannel;
-            // eslint-disable-next-line prettier/prettier
 
             channel.attributes[type][index].setChannelValue(attrChannel, value);
         }
+    }
+
+    createDirectories() {
+        Promise.all(Object.values(DIRECTORIES).map((path => fs.mkdir(path)))).then(() => {
+            console.log('[BONFIRE] Directories created.');
+        }).catch(() => {
+            console.log('[BONFIRE] Directory Creation: Directories exist or permission denied.')
+        });
     }
 
     setChannelsAttributeChannel(

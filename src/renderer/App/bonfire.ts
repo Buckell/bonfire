@@ -14,6 +14,7 @@ import {
     DeviceData as DcsmDeviceData,
     MainConfiguration as DcsmMainConfiguration,
 } from '../../app_shared/dcsm';
+import { ProjectData } from '../../main/app/project/ProjectData';
 
 export const Bonfire = {
     getChannels: () =>
@@ -94,6 +95,11 @@ export const Bonfire = {
             }>,
         setConfig: (config: DcsmMainConfiguration) =>
             GADE.call('Bonfire.DCSM.SetConfig', config),
+    },
+    project: {
+        promptCreation: () => GADE.call('Bonfire.Project.PromptCreate'),
+        create: (projectData: ProjectData) => GADE.call('Bonfire.Project.Create', projectData),
+        save: () => GADE.call('Bonfire.Project.Save'),
     },
 };
 

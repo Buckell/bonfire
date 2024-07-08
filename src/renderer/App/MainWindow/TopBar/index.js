@@ -5,7 +5,20 @@ import { PlayMode } from '../../../../app_shared/bonfire';
 import GADE from '../../../gade/gade';
 
 export default function TopBar() {
-    const [playMode, setPlayMode] = GADE.shared.useValue('Bonfire.PlayMode', 'TOPBAR');
+    const [playMode, setPlayMode] = GADE.shared.useValue(
+        'Bonfire.PlayMode',
+        'TOPBAR',
+    );
+
+    const [projectName] = GADE.shared.useValue(
+        'Bonfire.Project.Name',
+        'TOPBAR',
+    );
+
+    const [projectSaveStatus] = GADE.shared.useValue(
+        'Bonfire.Project.SaveStatus',
+        'TOPBAR',
+    );
 
     const playModeConfiguration = {};
 
@@ -27,6 +40,14 @@ export default function TopBar() {
         );
     };
 
+    const saveStatusDescriptions = [
+        'No changes.',
+        'Unsaved changes.',
+        'Writing changes...',
+        'Saving...',
+        'Changes saved.',
+    ];
+
     return (
         <Container
             style={{
@@ -45,7 +66,7 @@ export default function TopBar() {
                         fontSize="12pt"
                         margin="0"
                     >
-                        Rumors 2023
+                        {projectName}
                     </Typography>
                     <Typography
                         display="block"
@@ -54,7 +75,7 @@ export default function TopBar() {
                         color="#bbb"
                         margin="2px 0 2px 0"
                     >
-                        Changes saved.
+                        {saveStatusDescriptions?.[projectSaveStatus]}
                     </Typography>
                 </div>
             </div>
