@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { SharedValue } from '../../shared';
 import GADE from '../../gade';
 import { SaveStatus } from './SaveStatus';
-import { archiveFolder } from 'zip-lib';
+import { archiveFolder, extract } from 'zip-lib';
 import { DIRECTORIES } from '../directories';
 import { openWindow, windows } from '../../window';
 import { ProjectData } from './ProjectData';
@@ -24,6 +24,8 @@ export default class ProjectHandler {
         SaveStatus.Created,
     );
 
+    projectCreationDate?: Date;
+
     projectCreateWindowId: number = -1;
 
     constructor() {
@@ -40,6 +42,7 @@ export default class ProjectHandler {
         GADE.register('Bonfire.Project.PromptCreate', this.promptCreateProject.bind(this));
         GADE.register('Bonfire.Project.Create', this.createProject.bind(this));
         GADE.register('Bonfire.Project.Save', this.save.bind(this));
+        GADE.register('Bonfire.Project.Open', this.open.bind(this));
     }
 
     promptCreateProject() {
@@ -66,6 +69,8 @@ export default class ProjectHandler {
         this.projectName.value = projectData.name;
         this.projectPath.value = projectData.path;
 
+        this.projectCreationDate = new Date();
+
         await this.save();
     }
 
@@ -73,6 +78,7 @@ export default class ProjectHandler {
         return {
             name: this.projectName.value,
             writeTimestamp: new Date().getTime(),
+            creation: this.projectCreationDate?.getTime(),
         };
     }
 
@@ -89,6 +95,17 @@ export default class ProjectHandler {
         });
     }
 
+    async read() {
+        fs.readFile(
+            path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'),
+        ).then((content) => {
+            const data = JSON.parse(String(content));
+
+            this.projectName.value = data.name;
+            this.projectCreationDate = new Date(data.creation);
+        });
+    }
+
     async save() {
         await this.write();
 
@@ -101,7 +118,24 @@ export default class ProjectHandler {
         }
     }
 
-    load() {
+    async open(file: string) {
+        if (path.extname(file) !== '.bonfire') {
+            return;
+        }
 
+        await fs.stat(file).then(() => {
+            this.projectPath.value = file;
+        });
+
+        if (this.projectPath.value === file) {
+            await this.load();
+        }
+    }
+
+    async load() {
+        if (this.projectPath.value) {
+            await extract(this.projectPath.value, DIRECTORIES.PROJECT_WORKING);
+            await this.read();
+        }
     }
 }

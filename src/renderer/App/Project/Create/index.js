@@ -25,7 +25,10 @@ export default function ProjectCreate() {
 
     useEffect(() => {
         if (!pathChanged) {
-            const sanitizedName = name.toLowerCase().replaceAll(' ', '_').replaceAll(/[^a-z0-9_]+/g, '');
+            const sanitizedName = name
+                .toLowerCase()
+                .replaceAll(' ', '_')
+                .replaceAll(/[^a-z0-9_]+/g, '');
             setPath(`${directories?.PROJECTS}/${sanitizedName}.bonfire`);
         }
     }, [name, directories, pathChanged]);

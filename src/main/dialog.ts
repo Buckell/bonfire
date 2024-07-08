@@ -59,5 +59,5 @@ GADE.register('FileDialog.Open', (options?: OpenDialogOptions) =>
 );
 
 GADE.register('FileDialog.Save', (options?: SaveDialogOptions) =>
-    dialog.showSaveDialog(options || {})
+    dialog.showSaveDialog(options || {}),
 );

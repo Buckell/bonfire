@@ -42,7 +42,20 @@ export default function MainWindow() {
                         title="Open..."
                         icon={faFolder}
                         action={() => {
-                            console.log('Open!');
+                            GADE.openFileDialog({
+                                title: 'Open Project',
+                                properties: ['openFile'],
+                                filters: [
+                                    {
+                                        name: 'Bonfire Project',
+                                        extensions: ['bonfire'],
+                                    }
+                                ]
+                            }).then((response) => {
+                                if (!response.canceled && response.filePaths.length > 0) {
+                                    Bonfire.project.open(response.filePaths[0]);
+                                }
+                            })
                         }}
                     />
                     <MenuItem

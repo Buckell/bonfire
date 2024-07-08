@@ -100,6 +100,7 @@ export const Bonfire = {
         promptCreation: () => GADE.call('Bonfire.Project.PromptCreate'),
         create: (projectData: ProjectData) => GADE.call('Bonfire.Project.Create', projectData),
         save: () => GADE.call('Bonfire.Project.Save'),
+        open: (path: string) => GADE.call('Bonfire.Project.Open', path),
     },
 };
 
