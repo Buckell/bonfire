@@ -45,7 +45,13 @@ export default function MainWindow() {
                             console.log('Open!');
                         }}
                     />
-                    <MenuItem title="Save As..." icon={faSave} />
+                    <MenuItem
+                        title="Save"
+                        icon={faSave}
+                        action={() => {
+                            Bonfire.project.save();
+                        }}
+                    />
                     <Menu title="Recent Projects">
                         <MenuItem title="Unnamed Show 1 (unnamed1.bonfire)" />
                         <MenuItem title="Rumors 2023 (rumors2023.bonfire)" />
