@@ -1,5 +1,6 @@
 import TRANSMISSION from './transmission';
 import HOOKS from './hooks';
+import GADE from './gade';
 
 export class SharedValue<T> {
     id: string;
@@ -18,6 +19,7 @@ export class SharedValue<T> {
     set value(newValue: T | null | undefined) {
         this.internalValue = newValue;
 
+        GADE.broadcast('Shared.Changed', this.id, newValue);
         HOOKS.call('Shared.Changed', this.id, newValue);
     }
 }
@@ -51,10 +53,9 @@ TRANSMISSION.register('Shared.Set', (id: string, value: any) => {
     const sharedValue: SharedValue<any> | undefined = values[id];
 
     if (sharedValue) {
-        sharedValue.value = value;
+        sharedValue.internalValue = value;
+        HOOKS.call('Shared.Changed', id, value);
     }
 });
-
-HOOKS.bridge('Shared.Changed');
 
 export default SHARED;
