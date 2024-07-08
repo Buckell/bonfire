@@ -7,6 +7,12 @@ export const windows: { [id: string]: BrowserWindow } = {};
 
 export type WindowOptions = {
     hideOverlay?: boolean;
+    width?: number;
+    height?: number;
+    minWidth?: number;
+    minHeight?: number;
+    resizable?: boolean;
+    noDevTools?: boolean;
 };
 
 export const openWindow = (
@@ -23,10 +29,10 @@ export const openWindow = (
 
     const window = new BrowserWindow({
         show: false,
-        width: 1000,
-        height: 700,
-        minWidth: 500,
-        minHeight: 500,
+        width: options.width || 1000,
+        height: options.height || 700,
+        minWidth: options.minWidth || 500,
+        minHeight: options.minHeight || 500,
         icon: getAssetPath('icon.png'),
         webPreferences: {
             preload: app.isPackaged
@@ -42,6 +48,7 @@ export const openWindow = (
                   symbolColor: '#ffffffaa',
                   height: 40,
               },
+        resizable: options.resizable || true,
     });
 
     if (windowPath) {
@@ -54,6 +61,10 @@ export const openWindow = (
         }
 
         window.show();
+
+        if (options.noDevTools) {
+            window.webContents.closeDevTools();
+        }
     });
 
     const keys = Object.keys(windows);

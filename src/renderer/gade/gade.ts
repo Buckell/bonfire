@@ -1,9 +1,13 @@
 import { Reducer } from '@reduxjs/toolkit';
-import { IpcMainEvent, OpenDialogOptions, OpenDialogReturnValue } from 'electron';
+import {
+    OpenDialogOptions,
+    OpenDialogReturnValue,
+} from 'electron';
 import { useEffect, useState } from 'react';
 import { MenuData } from '../../gade_shared/menu';
 import { reducers } from './reducers';
 import { DialogData } from '../../gade_shared/dialog';
+import { WindowOptions } from '../../main/window';
 
 export enum MenuPosition {
     Right,
@@ -43,8 +47,8 @@ const GADE = {
     },
     openMenu: (data: MenuData) => GADE.call('Menu.Open', data),
     closeMenu: (level: number) => GADE.call('Menu.Close', level),
-    openWindow: (path: string) =>
-        GADE.call('Window.Open', path) as Promise<number>,
+    openWindow: (path: string, options?: WindowOptions) =>
+        GADE.call('Window.Open', path, options) as Promise<number>,
     openDialog: (
         data: DialogData,
         onAction: (id: number, action: string) => void,
