@@ -167,6 +167,7 @@ const GADE = {
         },
         useValue: <T>(id: string, listenerId: string) => {
             const [value, setValue] = useState<T | null>();
+            const [suppress, setSuppress] = useState<boolean>(false);
 
             useEffect(() => {
                 GADE.shared.retrieve<T>(id).then(setValue);
@@ -174,6 +175,11 @@ const GADE = {
 
             useEffect(() => {
                 if (value) {
+                    if (suppress) {
+                        setSuppress(false);
+                        return;
+                    }
+
                     GADE.shared.set<T>(id, value);
                 }
             }, [id, value]);
@@ -183,6 +189,7 @@ const GADE = {
                 `${listenerId}: ${id}`,
                 (changedId: string, changedValue: any) => {
                     if (changedId === id) {
+                        setSuppress(true);
                         setValue(changedValue);
                     }
                 },
