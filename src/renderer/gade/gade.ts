@@ -2,6 +2,8 @@ import { Reducer } from '@reduxjs/toolkit';
 import {
     OpenDialogOptions,
     OpenDialogReturnValue,
+    SaveDialogOptions,
+    SaveDialogReturnValue,
 } from 'electron';
 import { useEffect, useState } from 'react';
 import { MenuData } from '../../gade_shared/menu';
@@ -70,7 +72,9 @@ const GADE = {
         ),
     closeDialog: (id: number) => GADE.call('Dialog.Close', id),
     openFileDialog: (options?: OpenDialogOptions) =>
-        GADE.call('FileDialog.Open') as Promise<OpenDialogReturnValue>,
+        GADE.call('FileDialog.Open', options) as Promise<OpenDialogReturnValue>,
+    saveFileDialog: (options?: SaveDialogOptions) =>
+        GADE.call('FileDialog.Save', options) as Promise<SaveDialogReturnValue>,
     getContextMenuPosition: (event: MouseEvent) => [
         event.screenX,
         event.screenY - 10,

@@ -1,4 +1,9 @@
-import { dialog, OpenDialogOptions, BrowserWindow } from 'electron';
+import {
+    dialog,
+    OpenDialogOptions,
+    SaveDialogOptions,
+    BrowserWindow,
+} from 'electron';
 import GADE from './gade';
 import { closeWindow, openWindow, windows } from './window';
 import { DialogData } from '../gade_shared/dialog';
@@ -46,7 +51,13 @@ GADE.receive('Dialog.Action', (event, id: number, action: string) => {
 });
 
 GADE.register('FileDialog.Open', (options?: OpenDialogOptions) =>
-    dialog.showOpenDialog(options || {
-        properties: ['openFile'],
-    })
+    dialog.showOpenDialog(
+        options || {
+            properties: ['openFile'],
+        },
+    ),
+);
+
+GADE.register('FileDialog.Save', (options?: SaveDialogOptions) =>
+    dialog.showSaveDialog(options || {})
 );
