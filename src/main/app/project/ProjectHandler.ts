@@ -7,6 +7,7 @@ import { SaveStatus } from './SaveStatus';
 import { DIRECTORIES } from '../directories';
 import { openWindow, windows } from '../../window';
 import { ProjectData } from './ProjectData';
+import { PlayMode } from '../../../app_shared/bonfire';
 
 export default class ProjectHandler {
     projectName: SharedValue<string> = GADE.shared.use<string>(
@@ -33,12 +34,26 @@ export default class ProjectHandler {
 
     projectCreateWindowId: number = -1;
 
+    suppressWrite: boolean = false;
+
+    dataStore: { [file: string]: { [key: string]: SharedValue<any> } } = {
+        config: {},
+    };
+
     constructor() {
         GADE.hooks.add(
             'Shared.Changed',
             'PROJECT_HANDLER',
             (id: string, newValue: any) => {
-                if (id === 'Bonfire.Project.Name') {
+                if (
+                    id === 'Bonfire.Project.Name' ||
+                    id.startsWith('Bonfire.Project.Store')
+                ) {
+                    if (this.suppressWrite) {
+                        this.suppressWrite = false;
+                        return;
+                    }
+
                     this.write();
                 }
             },
@@ -53,6 +68,38 @@ export default class ProjectHandler {
         GADE.register('Bonfire.Project.Open', this.open.bind(this));
 
         this.setupProjectsHandler();
+
+        const playModeStore = this.useDataStoreValue<PlayMode>(
+            'config',
+            'PlayMode',
+            PlayMode.Live,
+        );
+        GADE.shared
+            .use('Bonfire.PlayMode', PlayMode.Live)
+            .onChange(
+                'PROJECT_HANDLER_PLAYMODE',
+                (newValue: PlayMode) => (playModeStore.value = newValue),
+            );
+    }
+
+    useDataStoreValue<T>(file: string, key: string, initialValue: T) {
+        if (this.dataStore[file] === undefined) {
+            this.dataStore[file] = {};
+        }
+
+        const fileData: { [key: string]: SharedValue<any> } =
+            this.dataStore[file];
+
+        const fileDataValue = fileData[key];
+
+        if (fileDataValue === undefined) {
+            return (fileData[key] = GADE.shared.use<T>(
+                `Bonfire.Project.Store[${file}][${key}]`,
+                initialValue,
+            ));
+        }
+
+        return fileDataValue;
     }
 
     setupProjectsHandler() {
@@ -95,17 +142,15 @@ export default class ProjectHandler {
                 );
 
             console.log('[BONFIRE] Projects manifest loaded.');
-            console.log(this.projects.value);
         });
 
-        GADE.hooks.add(
-            'Shared.Changed',
+        this.projects.onChange(
             'PROJECT_HANDLER_PROJECTS',
-            (id: string, newValue: string) => {
+            (newValue: ProjectData[]) => {
                 fs.writeFile(
                     projectsFilePath,
                     JSON.stringify({
-                        projects: this.projects.value?.map((data) => ({
+                        projects: newValue.map((data) => ({
                             ...data,
                             creation: data.creation?.getTime(),
                             latestAccess: data.latestAccess?.getTime(),
@@ -155,6 +200,21 @@ export default class ProjectHandler {
         this.saveStatus.value = SaveStatus.Writing;
 
         await Promise.all([
+            ...Object.entries(this.dataStore).map(([file, entries]) =>
+                fs.writeFile(
+                    path.resolve(DIRECTORIES.PROJECT_WORKING, `${file}.json`),
+                    JSON.stringify(
+                        Object.fromEntries(
+                            Object.entries(entries).map(
+                                ([key, sharedValue]) => [
+                                    key,
+                                    sharedValue.value,
+                                ],
+                            ),
+                        ),
+                    ),
+                ),
+            ),
             fs.writeFile(
                 path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'),
                 JSON.stringify(this.generateWriteInfo()),
@@ -165,14 +225,36 @@ export default class ProjectHandler {
     }
 
     async read() {
-        await fs.readFile(
-            path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'),
-        ).then((content) => {
-            const data = JSON.parse(String(content));
+        await fs
+            .readFile(path.resolve(DIRECTORIES.PROJECT_WORKING, 'info.json'))
+            .then((content) => {
+                const data = JSON.parse(String(content));
 
-            this.projectName.value = data.name;
-            this.projectCreationDate = new Date(data.creation);
-        });
+                this.suppressWrite = true;
+                this.projectName.value = data.name;
+                this.projectCreationDate = new Date(data.creation);
+            });
+
+        await Promise.all(
+            Object.entries(this.dataStore).map(([file, entries]) =>
+                fs
+                    .readFile(
+                        path.resolve(
+                            DIRECTORIES.PROJECT_WORKING,
+                            `${file}.json`,
+                        ),
+                    )
+                    .then((content) => {
+                        const data = JSON.parse(String(content));
+
+                        Object.entries(data).forEach(([key, value]) => {
+                            if (entries[key] !== undefined) {
+                                entries[key].value = value;
+                            }
+                        });
+                    }),
+            ),
+        );
     }
 
     async save() {
@@ -203,6 +285,20 @@ export default class ProjectHandler {
 
         if (this.projectPath.value === file) {
             await this.load();
+
+            this.projects.value = [
+                ...(this.projects.value || []).filter(
+                    (project: ProjectData) =>
+                        path.resolve(project.path) !==
+                        path.resolve(this.projectPath.value || ''),
+                ),
+                {
+                    name: this.projectName.value || '',
+                    path: this.projectPath.value,
+                    creation: this.projectCreationDate,
+                    latestAccess: new Date(),
+                },
+            ];
         }
     }
 
@@ -219,18 +315,7 @@ export default class ProjectHandler {
                 return;
             }
 
-            this.projects.value = [
-                ...(this.projects.value || []).filter(
-                    (project: ProjectData) =>
-                        path.resolve(project.path) !== path.resolve(this.projectPath.value || ''),
-                ),
-                {
-                    name: this.projectName.value,
-                    path: this.projectPath.value,
-                    creation: this.projectCreationDate,
-                    latestAccess: new Date(),
-                },
-            ];
+            this.saveStatus.value = SaveStatus.Saved;
         }
     }
 }

@@ -98,9 +98,15 @@ export const Bonfire = {
     },
     project: {
         promptCreation: () => GADE.call('Bonfire.Project.PromptCreate'),
-        create: (projectData: ProjectData) => GADE.call('Bonfire.Project.Create', projectData),
+        create: (projectData: ProjectData) =>
+            GADE.call('Bonfire.Project.Create', projectData),
         save: () => GADE.call('Bonfire.Project.Save'),
         open: (path: string) => GADE.call('Bonfire.Project.Open', path),
+        useStoreValue: (file: string, key: string, listenerId: string) =>
+            GADE.shared.useValue(
+                `Bonfire.Project.Store[${file}][${key}]`,
+                listenerId,
+            ),
     },
 };
 

@@ -3,10 +3,12 @@ import Button from '../../../gade/Button';
 import Typography from '../../../gade/Typography';
 import { PlayMode } from '../../../../app_shared/bonfire';
 import GADE from '../../../gade/gade';
+import { Bonfire } from '../../bonfire';
 
 export default function TopBar() {
-    const [playMode, setPlayMode] = GADE.shared.useValue(
-        'Bonfire.PlayMode',
+    const [playMode, setPlayMode] = Bonfire.project.useStoreValue(
+        'config',
+        'PlayMode',
         'TOPBAR',
     );
 

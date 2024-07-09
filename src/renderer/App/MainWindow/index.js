@@ -83,26 +83,31 @@ export default function MainWindow() {
                                 key={project.path}
                                 title={`${project.name} (${project.path})`}
                                 action={() => {
-                                    GADE.openDialog({
-                                        title: 'Confirm Open',
-                                        description: `Are you sure you want to open '${project.name}'?`,
-                                        options: [
-                                            {
-                                                label: 'Open',
-                                                action: 'open',
-                                            },
-                                            {
-                                                label: 'Cancel',
-                                                action: 'close',
-                                            },
-                                        ],
-                                    }, (id, action) => {
-                                        GADE.closeDialog(id);
+                                    GADE.openDialog(
+                                        {
+                                            title: 'Confirm Open',
+                                            description: `Are you sure you want to open '${project.name}'?`,
+                                            options: [
+                                                {
+                                                    label: 'Open',
+                                                    action: 'open',
+                                                },
+                                                {
+                                                    label: 'Cancel',
+                                                    action: 'close',
+                                                },
+                                            ],
+                                        },
+                                        (id, action) => {
+                                            GADE.closeDialog(id);
 
-                                        if (action === 'open') {
-                                            Bonfire.project.open(project.path);
-                                        }
-                                    });
+                                            if (action === 'open') {
+                                                Bonfire.project.open(
+                                                    project.path,
+                                                );
+                                            }
+                                        },
+                                    );
                                 }}
                             />
                         ))}

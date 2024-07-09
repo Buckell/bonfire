@@ -34,11 +34,6 @@ export default class Bonfire {
 
     dcsmOutput?: DCSM;
 
-    playMode: SharedValue<PlayMode> = GADE.shared.use(
-        'Bonfire.PlayMode',
-        PlayMode.Live,
-    );
-
     commandMode: SharedValue<string> = GADE.shared.use(
         'Bonfire.CommandMode',
         CommandMode.Control,
@@ -52,7 +47,13 @@ export default class Bonfire {
 
     projectHandler: ProjectHandler = new ProjectHandler();
 
-    directories: SharedValue<{ [key: string ]: string }> = GADE.shared.use(
+    playMode: SharedValue<PlayMode> = this.projectHandler.useDataStoreValue(
+        'config',
+        'PlayMode',
+        PlayMode.Live,
+    );
+
+    directories: SharedValue<{ [key: string]: string }> = GADE.shared.use(
         'Bonfire.Directories',
         DIRECTORIES,
     );
@@ -114,11 +115,15 @@ export default class Bonfire {
     }
 
     createDirectories() {
-        Promise.all(Object.values(DIRECTORIES).map((path => fs.mkdir(path)))).then(() => {
-            console.log('[BONFIRE] Directories created.');
-        }).catch(() => {
-            console.log('[BONFIRE] Directory Creation: Directories exist or permission denied.')
-        });
+        Promise.all(Object.values(DIRECTORIES).map((path) => fs.mkdir(path)))
+            .then(() => {
+                console.log('[BONFIRE] Directories created.');
+            })
+            .catch(() => {
+                console.log(
+                    '[BONFIRE] Directory Creation: Directories exist or permission denied.',
+                );
+            });
     }
 
     setChannelsAttributeChannel(
