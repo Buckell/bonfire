@@ -174,7 +174,7 @@ const GADE = {
             }, [id, setValue]);
 
             useEffect(() => {
-                if (value) {
+                if (value !== undefined) {
                     if (suppress) {
                         setSuppress(false);
                         return;
