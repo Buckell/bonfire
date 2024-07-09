@@ -9,14 +9,14 @@ export default function WindowMatrix() {
                     width: '50%',
                     height: '100%',
                 }}
-                id={1}
+                id={0}
             />
             <ToolWindow
                 style={{
                     width: '50%',
                     height: '100%',
                 }}
-                id={2}
+                id={1}
             />
         </Container>
     );

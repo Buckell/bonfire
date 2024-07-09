@@ -251,7 +251,8 @@ export default function Patches() {
                             <tr>
                                 <td>
                                     <Input
-                                        value={num}
+                                        defaultValue={num}
+                                        readOnly
                                         style={{
                                             width: '60px',
                                             borderRadius: 0,
@@ -275,7 +276,8 @@ export default function Patches() {
                                 </td>
                                 <td>
                                     <Input
-                                        value={device?.name}
+                                        defaultValue={device?.name}
+                                        readOnly
                                         style={{
                                             width: '200px',
                                             borderRadius: 0,
@@ -290,7 +292,8 @@ export default function Patches() {
                                 </td>
                                 <td>
                                     <Input
-                                        value={channel.baseAddress}
+                                        defaultValue={channel.baseAddress}
+                                        readOnly
                                         style={{
                                             width: '60px',
                                             borderRadius: 0,
@@ -305,10 +308,11 @@ export default function Patches() {
                                 </td>
                                 <td>
                                     <Input
-                                        value={
+                                        defaultValue={
                                             device?.channelConfiguration
                                                 .addressMappings.length
                                         }
+                                        readOnly
                                         style={{
                                             width: '60px',
                                             borderRadius: 0,

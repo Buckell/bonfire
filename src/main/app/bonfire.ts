@@ -58,6 +58,14 @@ export default class Bonfire {
         DIRECTORIES,
     );
 
+    toolWindowCount = GADE.shared.use(
+        'Bonfire.ToolWindow.Count',
+        2,
+    );
+
+    toolWindowTabLayout: SharedValue<string[]>[] = [];
+    toolWindowCurrentTab: SharedValue<string>[] = [];
+
     constructor() {
         this.createDirectories();
         this.setupClientDataHandlers();
@@ -80,6 +88,38 @@ export default class Bonfire {
         this.sacnOutput.start();
 
         this.dcsmOutput = new DCSM(this);
+
+        this.toolWindowCount.onChange('BONFIRE_TOOL_WINDOW_COUNT', this.resizeToolWindows.bind(this));
+        this.resizeToolWindows(this.toolWindowCount.value);
+    }
+
+    resizeToolWindows(newSize: number) {
+        const disposedWindows = this.toolWindowTabLayout.splice(newSize);
+        this.toolWindowTabLayout.splice(newSize);
+
+        disposedWindows.forEach((windowTabs) => {
+            windowTabs.value = [];
+        });
+
+        if (newSize > this.toolWindowTabLayout.length) {
+            for (let i = this.toolWindowTabLayout.length; i < newSize; ++i) {
+                this.toolWindowTabLayout.push(
+                    this.projectHandler.useDataStoreValue(
+                        'config',
+                        `ToolWindow.Layout[${i}]`,
+                        [],
+                    ),
+                );
+
+                this.toolWindowCurrentTab.push(
+                    this.projectHandler.useDataStoreValue(
+                        'config',
+                        `ToolWindow.CurrentTab[${i}]`,
+                        '',
+                    ),
+                );
+            }
+        }
     }
 
     createChannel(
