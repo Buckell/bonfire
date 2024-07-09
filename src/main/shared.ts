@@ -22,6 +22,18 @@ export class SharedValue<T> {
         GADE.broadcast('Shared.Changed', this.id, newValue);
         HOOKS.call('Shared.Changed', this.id, newValue);
     }
+
+    onChange(listenerId: string, callback: (value: T) => void) {
+        GADE.hooks.add(
+            'Shared.Changed',
+            listenerId,
+            (id: string, newValue: any) => {
+                if (id === this.id) {
+                    callback(newValue);
+                }
+            },
+        );
+    }
 }
 
 export const values: { [id: string]: SharedValue<any> } = {};
